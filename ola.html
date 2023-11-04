@@ -27,8 +27,8 @@
                         const extractedData = await processZipFile(data);
                         console.log(extractedData)
                         console.log('Start');
-                        await sleep(10000); // Sleep for 31,000 milliseconds (31 seconds)
-                        console.log('After 31 seconds');
+                        await sleep(5000); // Sleep for 5,000 milliseconds (5 seconds)
+                        console.log('After 5 seconds');
                         // Export the data to an Excel sheet
                         exportToExcel(extractedData);
                     };
