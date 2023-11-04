@@ -1,0 +1,90 @@
+Copy code
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Email Processing</title>
+</head>
+<body>
+    <input type="file" id="fileInput" accept=".zip">
+    <button id="processButton">Process, Extract, and Export</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script> <!-- Include JSZip library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script> <!-- Include xlsx library -->
+    <script>
+        function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+            document.getElementById('processButton').addEventListener('click', async function () {
+                const fileInput = document.getElementById('fileInput');
+                const file = fileInput.files[0];
+    
+                if (file) {
+                    const reader = new FileReader();
+    
+                    reader.onload = async function (event) {
+                        const data = event.target.result;
+    
+                        const extractedData = await processZipFile(data);
+                        console.log(extractedData)
+                        console.log('Start');
+                        await sleep(10000); // Sleep for 31,000 milliseconds (31 seconds)
+                        console.log('After 31 seconds');
+                        // Export the data to an Excel sheet
+                        exportToExcel(extractedData);
+                    };
+    
+                    reader.readAsArrayBuffer(file);
+                }
+            });
+    
+            async function processZipFile(data) {
+                let extractedData = []; // Array to store extracted data
+    
+                let total = 0;
+                // Process the zip file using JSZip
+                await JSZip.loadAsync(data)
+                    .then(function (zip) {
+                        // Iterate through the zip entries (files) and extract email content
+                        zip.forEach(async function (relativePath, zipEntry) {
+                            if (zipEntry.dir) {
+                                // This is a directory, you can skip it
+                                return;
+                            }
+    
+                            // Read the content of the email file (zipEntry)
+                            const emailContent = await zipEntry.async('string');
+    
+                            // Extract price information from the emailContent
+                            const priceRegex = /&#8377;(\d+) /;
+                            const priceMatch = priceRegex.exec(emailContent);
+    
+                            if (priceMatch) {
+                                // Extracted price
+                                const price = priceMatch[1];
+                                extractedData.push({
+                                    Price: parseInt(price),
+                                });
+                                total = total + parseInt(price);
+                                console.log('sum' , total)
+                            }
+                        });
+                    })
+                    .catch(function (error) {
+                        console.error('Error extracting zip file:', error);
+                    });
+    
+                return extractedData;
+            }
+    
+            function exportToExcel(data) {
+                const ws = XLSX.utils.json_to_sheet(data);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'ExtractedData');
+                XLSX.writeFile(wb, 'extracted_data.xlsx');
+            }
+        </script>
+    
+    </script>
+</body>
+</html>
