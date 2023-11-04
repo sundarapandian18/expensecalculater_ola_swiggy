@@ -1,4 +1,3 @@
-Copy code - USED CHATGPT
 <!DOCTYPE html>
 <html>
 <head>
@@ -28,7 +27,7 @@ Copy code - USED CHATGPT
                         const extractedData = await processZipFile(data);
                         console.log(extractedData)
                         console.log('Start');
-                        await sleep(6000); // Sleep for 6 seconds
+                        await sleep(10000); // Sleep for 31,000 milliseconds (31 seconds)
                         console.log('After 31 seconds');
                         // Export the data to an Excel sheet
                         exportToExcel(extractedData);
@@ -58,15 +57,23 @@ Copy code - USED CHATGPT
                             // Extract price information from the emailContent
                             const priceRegex = /&#8377;(\d+) /;
                             const priceMatch = priceRegex.exec(emailContent);
+
+                            const dateRegex = /<td[^>]*class="date-time"[^>]*>([\s\S]*?)<\/td>/;
+                            const dateMatch = dateRegex.exec(emailContent);
+                            
+                           
     
-                            if (priceMatch) {
-                                // Extracted price
+                            if (priceMatch && dateMatch) {
+                                // Extracted price and date
                                 const price = priceMatch[1];
+                                const date = dateMatch[1].trim().replace('<br>','');
+                                
                                 extractedData.push({
                                     Price: parseInt(price),
+                                    Date: date
                                 });
                                 total = total + parseInt(price);
-                                console.log('sum' , total)
+                                console.log('sum' , total);
                             }
                         });
                     })
